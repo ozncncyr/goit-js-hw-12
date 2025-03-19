@@ -4,14 +4,14 @@
   "version": "1.0.0",
   "type": "module",
   "description": "goit-js-hw-11",
-  "homepage": "https://ozancncyr.github.io/goit-js-hw-11/",
+  "homepage": "https://ozancncyr.github.io/goit-js-hw-12/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ozancncyr/goit-js-hw-11.git"
+    "url": "git+https://github.com/ozancncyr/goit-js-hw-12.git"
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build --base=/goit-js-hw-11/",
+    "build": "vite build --base=/goit-js-hw-12/",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
     "preview": "vite preview"
