@@ -7,9 +7,11 @@ import 'izitoast/dist/css/iziToast.min.css';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
+let searchedText, currentPage = 1, totalPages;
+
 const form = document.querySelector('.gallery-form');
-const gallery = document.querySelector('#appGallery');
 const galleryList = document.querySelector('#gallery-list');
+const loadMoreBtn = document.querySelector('#loadMoreBtn');
 
 const galleryItem = photoInfo => {
     const item = document.createElement('li');
@@ -103,6 +105,47 @@ let galleryBox = new SimpleLightbox('.gallery li > a', {
   captionDelay: 350,
 });
 
+const searchPhotos = (search, page) => {
+  return new Promise(async (resolve, reject) => {
+    console.log(`Search: ${search} | Page: ${page}`);
+
+    if (page > totalPages) {
+      currentPage = 1;
+      page = 1;
+    } else {
+      searchedText = search;
+      const pixabayApi = await axios.get("https://pixabay.com/api/", {
+        params: {
+          key: '49404317-b3e2234da46703b9b16558004',
+          q: search,
+          image_type: 'photo',
+          orientation: 'horizontal',
+          safesearch: true,
+          page: page,
+          per_page: 40,
+        }
+      });
+
+      totalPages = Math.ceil(parseFloat(pixabayApi.data.totalHits / pixabayApi.data.hits.length));
+      console.log(`Searched Photo: ${searchedText} \nCurrent Page: ${currentPage} \nTotal Pages: ${totalPages}`);
+
+      if (pixabayApi.data.hits.length === 0) {
+        iziToast.error({
+          position: 'topRight',
+          color: 'red',
+          message:
+            'Sorry, there are no images matching your search query. Please, try again!',
+        });
+      }
+      if (currentPage < totalPages) {
+        loadMoreBtn.style.display = 'block';
+      }
+
+      resolve(pixabayApi);
+    };
+  });
+};
+
 form.addEventListener('submit', async e => {
   e.preventDefault();
   galleryList.innerHTML = '';
@@ -124,43 +167,45 @@ form.addEventListener('submit', async e => {
     item.style.textAlign = 'center';
     item.style.border = 'none';
     galleryList.appendChild(item);
-
-    axios
-      .get('https://pixabay.com/api/', {
-        params: {
-          key: '49404317-b3e2234da46703b9b16558004',
-          q: search,
-          image_type: 'photo',
-          orientation: 'horizontal',
-          safesearch: true,
-        },
-      })
-      .then(response => {
-        const photos = response.data.hits;
-        galleryList.innerHTML = '';
-        if (photos.length === 0) {
-          iziToast.error({
-            position: 'topRight',
-            color: 'red',
-            message:
-              'Sorry, there are no images matching your search query. Please, try again!',
-          });
-        } else {
-          photos.forEach(photo => {
-            galleryItem(photo);
-          });
-          galleryBox.refresh();
-        }
-      })
-      .catch(error => {
-        iziToast.error({
-          position: 'topRight',
-          color: 'red',
-          message: error.message,
-        });
-        galleryList.innerHTML = '';
-        console.error("Pixabay error: ", error);
-      });
+    const responsedPhotos = await searchPhotos(search, currentPage);
+    const photos = responsedPhotos.data.hits;
+    galleryList.innerHTML = '';
+    photos.forEach(photo => {
+      galleryItem(photo);
+    });
+    galleryBox.refresh();
     e.target.reset();
   }
 });
+
+loadMoreBtn.addEventListener("click", async e => {
+  currentPage++;
+  const responsedPhotos = await searchPhotos(searchedText, currentPage);
+  const photos = responsedPhotos.data.hits;
+
+  photos.forEach(photo => {
+    galleryItem(photo);
+  });
+
+  const galleryItemD = document.querySelector(".gallery img");
+  if (galleryItemD) {
+    const cardHeight = galleryItemD.getBoundingClientRect().height;
+    window.scrollBy({
+      top: cardHeight * 3.85,
+      behavior: 'smooth',
+    });
+  }
+
+  galleryBox.refresh();
+
+   if (currentPage === totalPages) {
+    loadMoreBtn.removeEventListener("click", searchPhotos);
+    iziToast.error({
+      position: 'topRight',
+      color: 'blue',
+      message:
+        "We're sorry, but you've reached the end of search results!",
+    });
+  }
+
+})
