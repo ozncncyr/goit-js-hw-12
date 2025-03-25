@@ -15,8 +15,11 @@
 
 body {
   user-select: none;
-  background-image: url("../img/redblack-bg.jpg");
 }
+
+main {
+  background-color: maroon;
+  }
 
 .gallery-container {
   width: 100%;
