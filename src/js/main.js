@@ -122,7 +122,7 @@ const searchPhotos = (search, page) => {
           orientation: 'horizontal',
           safesearch: true,
           page: page,
-          per_page: 40,
+          per_page: 100,
         }
       });
 
@@ -148,6 +148,8 @@ const searchPhotos = (search, page) => {
 
 form.addEventListener('submit', async e => {
   e.preventDefault();
+  currentPage = 1;
+  loadMoreBtn.style.display = 'display';
   galleryList.innerHTML = '';
   const search = e.target.elements.search.value;
   if (search === '') {
@@ -206,6 +208,7 @@ loadMoreBtn.addEventListener("click", async e => {
       message:
         "We're sorry, but you've reached the end of search results!",
     });
+    loadMoreBtn.style.display = 'none';
   }
 
 })
