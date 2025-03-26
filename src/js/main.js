@@ -122,7 +122,7 @@ const searchPhotos = (search, page) => {
           orientation: 'horizontal',
           safesearch: true,
           page: page,
-          per_page: 100,
+          per_page: 40,
         }
       });
 
@@ -157,6 +157,7 @@ form.addEventListener('submit', async e => {
       position: 'topRight',
       message: 'Please enter a search query!',
     });
+    loadMoreBtn.style.display = 'none';
     return false;
   } else {
     const item = document.createElement('li');
@@ -193,7 +194,7 @@ loadMoreBtn.addEventListener("click", async e => {
   if (galleryItemD) {
     const cardHeight = galleryItemD.getBoundingClientRect().height;
     window.scrollBy({
-      top: cardHeight * 3.85,
+      top: cardHeight * 4.3,
       behavior: 'smooth',
     });
   }
